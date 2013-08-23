@@ -70,14 +70,18 @@
         return func.apply(this, arguments);
       } catch (_error) {
         e = _error;
-        console.log("exception executing callback: " + e);
-        console.log("  callsite:   " + callSite);
-        stackTrace = getStackTrace(e);
-        if (stackTrace) {
-          console.log("  stacktrace follows");
-          console.log(stackTrace);
+        if (onerror) {
+          return onerror(e.message, e.fileName, e.lineNumber, e);
+        } else {
+          console.log("exception executing callback: " + e);
+          console.log("  callsite:   " + callSite);
+          stackTrace = getStackTrace(e);
+          if (stackTrace) {
+            console.log("  stacktrace follows");
+            console.log(stackTrace);
+          }
+          throw e;
         }
-        throw e;
       }
     };
   };

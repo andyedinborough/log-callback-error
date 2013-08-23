@@ -59,15 +59,18 @@ wrappedCallBack = (callSite, func) ->
         try
             func.apply(this, arguments)
         catch e
-            console.log "exception executing callback: #{e}"
-            console.log "  callsite:   #{callSite}"
+            if onerror
+                onerror(e.message, e.fileName, e.lineNumber, e)
+            else 
+                console.log "exception executing callback: #{e}"
+                console.log "  callsite:   #{callSite}"
 
-            stackTrace = getStackTrace(e)
-            if stackTrace
-                console.log "  stacktrace follows"
-                console.log stackTrace
+                stackTrace = getStackTrace(e)
+                if stackTrace
+                    console.log "  stacktrace follows"
+                    console.log stackTrace
 
-            throw e
+                throw e
 
 #-------------------------------------------------------------------------------
 setUpCallSiteFormatters = ->
