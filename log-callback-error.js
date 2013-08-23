@@ -1,31 +1,34 @@
+/*
+#-----------------------------------------------------------------------------
+# The MIT License
+#
+# Copyright (c) 2011 Patrick Mueller
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#-----------------------------------------------------------------------------
+*/
+
+
 (function() {
-  /*
-  #-----------------------------------------------------------------------------
-  # The MIT License
-  #
-  # Copyright (c) 2011 Patrick Mueller
-  #
-  # Permission is hereby granted, free of charge, to any person obtaining a copy
-  # of this software and associated documentation files (the "Software"), to deal
-  # in the Software without restriction, including without limitation the rights
-  # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  # copies of the Software, and to permit persons to whom the Software is
-  # furnished to do so, subject to the following conditions:
-  #
-  # The above copyright notice and this permission notice shall be included in
-  # all copies or substantial portions of the Software.
-  #
-  # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  # THE SOFTWARE.
-  #-----------------------------------------------------------------------------
-  */
-  var getFunctionName, getStackTrace, main, setUpCallSiteFormatters, wrapFunction, wrappedCallBack;
-  var __slice = Array.prototype.slice;
+  var getFunctionName, getStackTrace, main, setUpCallSiteFormatters, wrapFunction, wrappedCallBack,
+    __slice = [].slice;
+
   main = function() {
     var NodeP, XHRP;
     setUpCallSiteFormatters();
@@ -37,6 +40,7 @@
     NodeP.addEventListener = wrapFunction(NodeP.addEventListener, 1);
     return XHRP.addEventListener = wrapFunction(XHRP.addEventListener, 1);
   };
+
   wrapFunction = function() {
     var cbIndices, func;
     func = arguments[0], cbIndices = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -55,15 +59,17 @@
       return func.apply(this, arguments);
     };
   };
+
   wrappedCallBack = function(callSite, func) {
     if (typeof func !== 'function') {
       return func;
     }
     return function() {
-      var stackTrace;
+      var e, stackTrace;
       try {
         return func.apply(this, arguments);
-      } catch (e) {
+      } catch (_error) {
+        e = _error;
         console.log("exception executing callback: " + e);
         console.log("  callsite:   " + callSite);
         stackTrace = getStackTrace(e);
@@ -75,6 +81,7 @@
       }
     };
   };
+
   setUpCallSiteFormatters = function() {
     var NodeP, XHRP;
     window.setTimeout.__callSiteFormatter = function(receiver, args) {
@@ -99,6 +106,7 @@
       return "XMLHttpRequest.addEventListener('" + args[0] + "', " + (getFunctionName(args[1])) + ")";
     };
   };
+
   getFunctionName = function(func) {
     if (func.name) {
       return func.name;
@@ -108,11 +116,14 @@
     }
     return '<anonymous>';
   };
+
   getStackTrace = function(e) {
     if (e.stack) {
       return e.stack;
     }
     return null;
   };
+
   main();
+
 }).call(this);

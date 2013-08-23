@@ -1,0 +1,10 @@
+{
+  "name": "log-callback-error",
+  "dependencies": {
+    "grunt": "~0.4.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-uglify": "~0.2.2"
+  }
+}
