@@ -70,18 +70,17 @@
       var cbIndex, _i, _len;
       for (_i = 0, _len = cbIndices.length; _i < _len; _i++) {
         cbIndex = cbIndices[_i];
-        arguments[cbIndex] = arguments[cbIndex].__call || arguments[cbIndex];
+        arguments[cbIndex] = arguments[cbIndex].__caller || arguments[cbIndex];
       }
       return func.apply(this, arguments);
     };
   };
 
   wrappedCallBack = function(callSite, func) {
-    var wrapped;
     if (typeof func !== 'function') {
       return func;
     }
-    wrapped = function() {
+    func.__caller = function() {
       var e, stackTrace;
       try {
         return func.apply(this, arguments);
@@ -101,8 +100,7 @@
         }
       }
     };
-    wrapped._call = func;
-    return wrapped;
+    return func.__caller;
   };
 
   setUpCallSiteFormatters = function() {

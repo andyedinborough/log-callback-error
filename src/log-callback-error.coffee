@@ -59,7 +59,7 @@ wrapFunction = (func, cbIndices...) ->
 unwrapFunction = (func, cbIndices...) ->
     ->
         for cbIndex in cbIndices
-            arguments[cbIndex] = arguments[cbIndex].__call || arguments[cbIndex];
+            arguments[cbIndex] = arguments[cbIndex].__caller || arguments[cbIndex];
 
         func.apply(this, arguments)
 
@@ -67,7 +67,7 @@ unwrapFunction = (func, cbIndices...) ->
 wrappedCallBack = (callSite, func) ->
     return func if typeof(func) isnt 'function'
 
-    wrapped = ->
+    func.__caller = ->
         try
             func.apply(this, arguments)
         catch e
@@ -84,8 +84,7 @@ wrappedCallBack = (callSite, func) ->
 
                 throw e
 
-    wrapped._call = func
-    wrapped
+    func.__caller
 
 #-------------------------------------------------------------------------------
 setUpCallSiteFormatters = ->
