@@ -26,7 +26,7 @@
 
 
 (function() {
-  var getFunctionName, getStackTrace, main, setUpCallSiteFormatters, wrapFunction, wrappedCallBack,
+  var getFunctionName, getStackTrace, main, setUpCallSiteFormatters, unwrapFunction, wrapFunction, wrappedCallBack,
     __slice = [].slice;
 
   main = function() {
@@ -37,8 +37,11 @@
     NodeP = Node.prototype;
     XHRP = XMLHttpRequest.prototype;
     window.addEventListener = wrapFunction(window.addEventListener, 1);
+    window.removeEventListener = unwrapFunction(window.removeEventListener, 1);
     NodeP.addEventListener = wrapFunction(NodeP.addEventListener, 1);
-    return XHRP.addEventListener = wrapFunction(XHRP.addEventListener, 1);
+    NodeP.removeEventListener = unwrapFunction(NodeP.removeEventListener, 1);
+    XHRP.addEventListener = wrapFunction(XHRP.addEventListener, 1);
+    return XHRP.removeEventListener = unwrapFunction(XHRP.removeEventListener, 1);
   };
 
   wrapFunction = function() {
@@ -60,11 +63,25 @@
     };
   };
 
+  unwrapFunction = function() {
+    var cbIndices, func;
+    func = arguments[0], cbIndices = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    return function() {
+      var cbIndex, _i, _len;
+      for (_i = 0, _len = cbIndices.length; _i < _len; _i++) {
+        cbIndex = cbIndices[_i];
+        arguments[cbIndex] = arguments[cbIndex].__call || arguments[cbIndex];
+      }
+      return func.apply(this, arguments);
+    };
+  };
+
   wrappedCallBack = function(callSite, func) {
+    var wrapped;
     if (typeof func !== 'function') {
       return func;
     }
-    return function() {
+    wrapped = function() {
       var e, stackTrace;
       try {
         return func.apply(this, arguments);
@@ -84,6 +101,8 @@
         }
       }
     };
+    wrapped._call = func;
+    return wrapped;
   };
 
   setUpCallSiteFormatters = function() {

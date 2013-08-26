@@ -34,8 +34,12 @@ main = () ->
     XHRP   = XMLHttpRequest.prototype
 
     window.addEventListener = wrapFunction(window.addEventListener, 1)
+    window.removeEventListener = unwrapFunction(window.removeEventListener, 1)
     NodeP.addEventListener  = wrapFunction(NodeP.addEventListener,  1)
+    NodeP.removeEventListener = unwrapFunction(NodeP.removeEventListener, 1)
     XHRP.addEventListener   = wrapFunction(XHRP.addEventListener,   1)
+    XHRP.removeEventListener = unwrapFunction(XHRP.removeEventListener, 1)
+
 
 #-------------------------------------------------------------------------------
 wrapFunction = (func, cbIndices...) ->
@@ -52,10 +56,18 @@ wrapFunction = (func, cbIndices...) ->
         func.apply(this, arguments)
 
 #-------------------------------------------------------------------------------
+unwrapFunction = (func, cbIndices...) ->
+    ->
+        for cbIndex in cbIndices
+            arguments[cbIndex] = arguments[cbIndex].__call || arguments[cbIndex];
+
+        func.apply(this, arguments)
+
+#-------------------------------------------------------------------------------
 wrappedCallBack = (callSite, func) ->
     return func if typeof(func) isnt 'function'
 
-    ->
+    wrapped = ->
         try
             func.apply(this, arguments)
         catch e
@@ -71,6 +83,9 @@ wrappedCallBack = (callSite, func) ->
                     console.log stackTrace
 
                 throw e
+
+    wrapped._call = func
+    wrapped
 
 #-------------------------------------------------------------------------------
 setUpCallSiteFormatters = ->
